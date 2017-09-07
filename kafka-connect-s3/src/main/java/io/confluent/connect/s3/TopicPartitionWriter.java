@@ -116,7 +116,7 @@ public class TopicPartitionWriter {
     rotateIntervalMs = connectorConfig.getLong(S3SinkConnectorConfig.ROTATE_INTERVAL_MS_CONFIG);
     rotateScheduleIntervalMs =
         connectorConfig.getLong(S3SinkConnectorConfig.ROTATE_SCHEDULE_INTERVAL_MS_CONFIG);
-    if(rotateScheduleIntervalMs > 0) {
+    if(rotateIntervalMs > 0) {
       timeZone = DateTimeZone.forID(connectorConfig.getString(PartitionerConfig.TIMEZONE_CONFIG));
     }
     timeoutMs = connectorConfig.getLong(S3SinkConnectorConfig.RETRY_BACKOFF_CONFIG);
@@ -285,45 +285,46 @@ public class TopicPartitionWriter {
       return false;
     }
     // rotateIntervalMs > 0 implies timestampExtractor != null
-    boolean periodicRotation = rotateIntervalMs > 0
-        && (
-        recordTimestamp - baseRecordTimestamp >= rotateIntervalMs
-            || !encodedPartition.equals(currentEncodedPartition)
-    );
+    // boolean periodicRotation = rotateIntervalMs > 0
+    //     && (
+    //     recordTimestamp - baseRecordTimestamp >= rotateIntervalMs
+    //         || !encodedPartition.equals(currentEncodedPartition)
+    // );
 
-    log.trace(
-        "Checking rotation on time with recordCount '{}' and encodedPartition '{}'",
-        recordCount,
-        encodedPartition
-    );
+    // log.trace(
+    //     "Checking rotation on time with recordCount '{}' and encodedPartition '{}'",
+    //     recordCount,
+    //     encodedPartition
+    // );
 
-    log.trace(
-        "Should apply periodic time-based rotation (rotateIntervalMs: '{}', baseRecordTimestamp: "
-            + "'{}', timestamp: '{}')? {}",
-        rotateIntervalMs,
-        baseRecordTimestamp,
-        recordTimestamp,
-        periodicRotation
-    );
+    // log.trace(
+    //     "Should apply periodic time-based rotation (rotateIntervalMs: '{}', baseRecordTimestamp: "
+    //         + "'{}', timestamp: '{}')? {}",
+    //     rotateIntervalMs,
+    //     baseRecordTimestamp,
+    //     recordTimestamp,
+    //     periodicRotation
+    // );
+    
 
-    boolean scheduledRotation = rotateScheduleIntervalMs > 0 && now >= nextScheduledRotation;
+    boolean scheduledRotation = rotateIntervalMs > 0 && now >= nextScheduledRotation;
     log.trace(
         "Should apply scheduled rotation: (rotateScheduleIntervalMs: '{}', nextScheduledRotation:"
             + " '{}', now: '{}')? {}",
-        rotateScheduleIntervalMs,
+        rotateIntervalMs,
         nextScheduledRotation,
         now,
         scheduledRotation
     );
-    return periodicRotation || scheduledRotation;
+    return scheduledRotation;
   }
 
   private void setNextScheduledRotation () {
-    if (rotateScheduleIntervalMs > 0) {
+    if (rotateIntervalMs > 0) {
       long now = time.milliseconds();
       nextScheduledRotation = DateTimeUtils.getNextTimeAdjustedByDay(
           now,
-          rotateScheduleIntervalMs,
+          rotateIntervalMs,
           timeZone
       );
       if (log.isDebugEnabled()) {
