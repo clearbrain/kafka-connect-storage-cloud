@@ -1,5 +1,8 @@
 # Kafka Connect Suite of Cloud Storage Connectors
 
+## ClearBrain Notes:
+This repo is forked from the confluent project for the purpose of updating the TopicPartitionWriter (as of 2017/9/7) to allow for the S3 Sink to flush files to S3 at a schedule cadence regardless of whether the flush size hits the configured limit (15000 records)
+
 *kafka-connect-storage-cloud* is a suite of [Kafka Connectors](http://kafka.apache.org/documentation.html#connect)
 designed to be used to copy data between Kafka and public cloud stores, such as Amazon S3. The currently available connectors are listed below:
 
